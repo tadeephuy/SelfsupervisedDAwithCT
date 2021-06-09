@@ -1,25 +1,39 @@
 from collections import defaultdict
+from copy import deepcopy
+import pandas as pd
 
 class Recorder:
-    def __init__(self, tags=['train_batch', 'train_epoch', 'valid_epoch']):
+    def __init__(self, tags=['train_batch', 'train_epoch', 'valid_epoch'], name='record'):
         self.tags = tags
         self.logs = {k: defaultdict(lambda: defaultdict(lambda: AverageMeter())) for k in self.tags}
+        self.name = name
+        self.logs_df = None
 
     def update(self, log, tag):
-        for k, v in self.logs[tag].items():
+        
+        for k, v in log.items():
             if k == 'losses':
                 for name in v.keys():
-                    v[name].update(log[k][name]) # loss is running average
+                    self.logs[tag][k][name].update(log[k][name]) # loss is running average
             elif k == 'metrics':
                 for name in v.keys():
-                    v[name] = log[k][name] # metrics is updated by replacement
+                    self.logs[tag][k][name] = log[k][name] # metrics is updated by replacement
 
     def visualize(self, *args):
         pass        
 
     def log(self, idx, tag):
-        print(idx)
-        print(self.logs[tag])
+        x = deepcopy(self.logs[tag])
+        if 'metrics' in x:
+            x['losses'].update(x['metrics'])
+        x = pd.DataFrame(x['losses'], index=[idx])
+        if self.logs_df is None:
+            self.logs_df = x
+        else:
+            self.logs_df = pd.concat([self.logs_df, x])
+        self.logs_df.to_csv(f'{self.name}.csv')
+        display(x)
+        
 
 
 class AverageMeter:
