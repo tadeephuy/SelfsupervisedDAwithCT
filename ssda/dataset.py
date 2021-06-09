@@ -6,7 +6,7 @@ from torch.utils.data import Dataset
 class AdaptationDataset(Dataset):
     def __init__(self, auxs, source_df, target_df, augs, label_cols_list):
         self.source_df = source_df
-        self.labels = source_df[label_cols_list]
+        self.labels = source_df[label_cols_list].values
         self.target_df = target_df
         self.augs = augs
         self.auxs = auxs
@@ -43,9 +43,10 @@ class AdaptationDataset(Dataset):
     def __len__(self):
         return len(self.source_df)
 
+    @staticmethod
     def read_image(path):
         img = cv2.imread(path)
-        img = cv2.cvtColot(img, cv2.COLOR_BGR2RGB)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         return img
 
 

@@ -18,9 +18,9 @@ class AdaptationModel(nn.Module):
 
     @torch.no_grad()
     def create_aux(self, backbone, n_aux_classes):
-        x = torch.randn(1, 128, 128)
+        x = torch.randn(1, 3, 128, 128)
         x = backbone(x)
-        assert len(x)==2, 'Make sure the backbone flattens the features'
+        assert len(x.shape)==2, 'Make sure the backbone flattens the features'
 
         n_feat = x.shape[1]
         return nn.Sequential(
